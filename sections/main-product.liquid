@@ -20,6 +20,7 @@
     {{ 'component-product-variant-picker.css' | asset_url | stylesheet_tag }}
     {{ 'component-swatch-input.css' | asset_url | stylesheet_tag }}
     {{ 'component-swatch.css' | asset_url | stylesheet_tag }}
+    {{ 'productCustom.css' | asset_url | stylesheet_tag }}
   {% endunless %}
   {%- if product.quantity_price_breaks_configured? -%}
     {{ 'component-volume-pricing.css' | asset_url | stylesheet_tag }}
@@ -105,6 +106,12 @@
                     </h2>
                   </a>
                 </div>
+              {%- when 'description' -%}
+                {%- if product.description != blank -%}
+                  <div class="product__description rte quick-add-hidden" {{ block.shopify_attributes }}>
+                    {{ product.description }}
+                  </div>
+                {%- endif -%}
               {%- when 'price' -%}
                 <div id="price-{{ section.id }}" role="status" {{ block.shopify_attributes }}>
                   {%- render 'price',
@@ -191,12 +198,7 @@
                     {%- endif -%}
                   {%- endif -%}
                 </p>
-              {%- when 'description' -%}
-                {%- if product.description != blank -%}
-                  <div class="product__description rte quick-add-hidden" {{ block.shopify_attributes }}>
-                    {{ product.description }}
-                  </div>
-                {%- endif -%}
+              
               {%- when 'sku' -%}
                 <p
                   class="product__sku{% if block.settings.text_style == 'uppercase' %} caption-with-letter-spacing{% elsif block.settings.text_style == 'subtitle' %} subtitle{% endif %}{% if product.selected_or_first_available_variant.sku.size == 0 %} visibility-hidden{% endif %}"
@@ -463,6 +465,8 @@
 
               {%- when 'variant_picker' -%}
                 {% render 'product-variant-picker', product: product, block: block, product_form_id: product_form_id %}
+             
+              
               {%- when 'buy_buttons' -%}
                 {%- render 'buy-buttons',
                   block: block,
@@ -722,7 +726,113 @@
       {{ product | structured_data }}
     </script>
   </div>
+ <!-- ACCORDIONS -->
+<section class="page-width mt-10 space-y-6">
+
+  <div class="accordion">
+    {% if product.metafields.custom.short_description != blank %}
+      <details open>
+        <summary>Product Description</summary>
+        <div class="accordion-content">
+          {{ product.metafields.custom.short_description.value }}
+        </div>
+      </details>
+    {% endif %}
+
+    {% if product.metafields.custom.specification %}
+      <details>
+        <summary>Specification</summary>
+        <div class="accordion-content">
+          {% assign specification = product.metafields.custom.specification.value | json_parse %}
+          <table class="specification-table">
+              <tbody>
+                {% if specification.acea %}
+                  <tr>
+                    <th>ACEA specification</th>
+                    <td>{{ specification.acea }}</td>
+                  </tr>
+                {% endif %}
+            
+                {% if specification.api %}
+                  <tr>
+                    <th>API specification</th>
+                    <td>{{ specification.api }}</td>
+                  </tr>
+                {% endif %}
+            
+                {% if specification.manufacturer %}
+                  <tr>
+                    <th>Manufacturer Approval</th>
+                    <td>{{ specification.manufacturer }}</td>
+                  </tr>
+                {% endif %}
+            
+                {% if specification.manufacturer_approval_1 %}
+                  <tr>
+                    <th>Manufacturer Approval</th>
+                    <td>{{ specification.manufacturer_approval_1 }}</td>
+                  </tr>
+                {% endif %}
+            
+                {% if specification.manufacturer_approval_2 %}
+                  <tr>
+                    <th>Manufacturer Approval</th>
+                    <td>{{ specification.manufacturer_approval_2 }}</td>
+                  </tr>
+                {% endif %}
+            
+                {% if specification.manufacturer_approval_3 %}
+                  <tr>
+                    <th>Manufacturer Approval</th>
+                    <td>{{ specification.manufacturer_approval_3 }}</td>
+                  </tr>
+                {% endif %}
+            
+                {% if specification.manufacturer_approval_4 %}
+                  <tr>
+                    <th>Manufacturer Approval</th>
+                    <td>{{ specification.manufacturer_approval_4 }}</td>
+                  </tr>
+                {% endif %}
+            
+                {% if specification.sae %}
+                  <tr>
+                    <th>SAE viscosity class</th>
+                    <td>{{ specification.sae }}</td>
+                  </tr>
+                {% endif %}
+            
+                {% if specification.extra %}
+                  <tr>
+                    <th>Extra</th>
+                    <td>{{ specification.extra }}</td>
+                  </tr>
+                {% endif %}
+              </tbody>
+            </table>
+
+        </div>
+      </details>
+    {% endif %}
+
+    {% if product.metafields.custom.data_sheet %}
+      <details>
+        <summary>Product Data Sheets ({{ product.metafields.custom.data_sheet.value.size }})</summary>
+        <div class="accordion-content">
+          <ul>
+            {% for sheet in product.metafields.custom.data_sheet.value %}
+              <li><a href="{{ sheet.url }}" target="_blank"><span class="file-icon">📄</span>{{ sheet.name }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </details>
+    {% endif %}
+  </div>
+
+</section>
 </product-info>
+
+
 
 {% schema %}
 {
